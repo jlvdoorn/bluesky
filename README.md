@@ -1,5 +1,10 @@
 # BlueSky - The Open Air Traffic Simulator
 
+This is just a fork of the original BlueSky repo used for the addition of the FlightPlanDatabase plug-in.
+For more info see [fpldb-plugin](https://www.github.com/jlvdoorn/bluesky-fpldb-plugin)
+
+## General
+
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/TUDelft-CNS-ATM/bluesky)
 
 BlueSky is meant as a tool to perform research on Air Traffic Management and Air Traffic Flows, and is distributed under the GNU General Public License v3.
