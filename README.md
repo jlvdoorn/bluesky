@@ -1,42 +1,27 @@
 # BlueSky - The Open Air Traffic Simulator
 
 This is just a fork of the original BlueSky repo used for the addition of the FlightPlanDatabase plug-in.
-For more info see [fpldb-plugin](https://www.github.com/jlvdoorn/bluesky-fpldb-plugin)
+For more info see the original [bluesky repo](https://github.com/TUDelft-CNS-ATM/bluesky)
 
-## General
+## Flight Plan Database
+https://flightplandatabase.com/dev/api
 
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/TUDelft-CNS-ATM/bluesky)
+## Requirements
+```pip install requests```
 
-BlueSky is meant as a tool to perform research on Air Traffic Management and Air Traffic Flows, and is distributed under the GNU General Public License v3.
+## Idea
+- Functions to communicate with Flight Plan Database
+- Make scenario that uses this function (to auto create flightplan)
+- Check whether nav points are already in bluesky database
+    If not -> Add them as custom waypoints or only flight specific points
 
-The goal of BlueSky is to provide everybody who wants to visualize, analyze or simulate air
-traffic with a tool to do so without any restrictions, licenses or limitations. It can be copied,
-modified, cited, etc. without any limitations.
+## Working
+- ```fpldb_plug.py``` is the main program. This needs to be copied into the bluesky plugins folder
+- In bluesky you need to enable the plugin by calling ```plugins load fpldb ```
+- There is also an example scenario file that automatically loads the plugin file ```fpldb_scn.scn```
 
-**Citation info:** J. M. Hoekstra and J. Ellerbroek, "[BlueSky ATC Simulator Project: an Open Data and Open Source Approach](https://www.researchgate.net/publication/304490055_BlueSky_ATC_Simulator_Project_an_Open_Data_and_Open_Source_Approach)", Proceedings of the seventh International Conference for Research on Air Transport (ICRAT), 2016.
+## Acknowledgements
+This plugin is build for the use together with [bluesky](https://github.com/TUDelft-CNS-ATM/bluesky) built by the TU Delft Air Traffic Management department.
 
-## BlueSky Releases
-If you are not (yet) interested in reading and editing the source of BlueSky, you can also download a release version of BlueSky, that you can install directly, without having to worry about python and library dependencies. You can find the latest release here:
-https://github.com/TUDelft-CNS-ATM/bluesky/releases
-
-## BlueSky Wiki
-Installation and user guides are accessible at:
-https://github.com/TUDelft-CNS-ATM/bluesky/wiki
-
-## Some features of BlueSky:
-- Written in the freely available, ultra-simple-hence-easy-to-learn, multi-platform language
-Python 3 (using numpy and either pygame or Qt+OpenGL for visualisation) with source
-- Extensible by means of self-contained [plugins](https://github.com/TUDelft-CNS-ATM/bluesky/wiki/plugin)
-- Contains open source data on navaids, performance data of aircraft and geography
-- Global coverage navaid and airport data
-- Contains simulations of aircraft performance, flight management system (LNAV, VNAV under construction),
-autopilot, conflict detection and resolution and airborne separation assurance systems
-- Compatible with BADA 3.x data
-- Compatible wth NLR Traffic Manager TMX as used by NLR and NASA LaRC
-- Traffic is controlled via user inputs in a console window or by playing scenario files (.SCN)
-containing the same commands with a time stamp before the command ("HH:MM:SS.hh>")
-- Mouse clicks in traffic window are use in console for lat/lon/heading and position inputs
-
-## Contributions
-BlueSky is still under heavy development. We would like to encourage anyone with a strong interest in
-ATM and/or Python to join us. Please feel free to comment, criticise, and contribute to this project. Please send suggestions, proposed changes or contributions through GitHub pull requests, preferably after debugging it and optimising it for run-time performance.
+## Status
+Work in Progress - Testing Version 1.0
