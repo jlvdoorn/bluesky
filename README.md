@@ -18,6 +18,7 @@ https://flightplandatabase.com/dev/api
 ## Working
 - ```fpldb_plug.py``` is the main program. This needs to be copied into the bluesky plugins folder
 - In bluesky you need to enable the plugin by calling ```plugins load fpldb ```
+- In bluesky the command needed is ```fplr```
 - There is also an example scenario file that automatically loads the plugin file ```fpldb_scn.scn```
 
 ## Acknowledgements
