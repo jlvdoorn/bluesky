@@ -4,9 +4,7 @@ It then compares the points in this routes with the existing nav database in blu
 If the points are not already present, it will add them to the database."""
 
 ###################### TODO ###########################
-# Implement SID/STAR - Is that even possible?!        #
-# Fix CheckDB?!                                       #
-# Add airways? - Needed? Route points form airway     #
+# Implement SID/STAR                                  #
 # Add auto return flight after time interval - Option #
 #######################################################
 
@@ -14,6 +12,8 @@ If the points are not already present, it will add them to the database."""
 # Import the global bluesky objects. Uncomment the ones you need
 from bluesky import core, stack, traf, settings, navdb, sim, scr, tools
 import requests, json
+import numpy as np
+import os, time
 
 ### Initialization function of your plugin. Do not change the name of this
 ### function, as it is the way BlueSky recognises this file as a plugin.
@@ -127,27 +127,21 @@ class Route():
     def checkDB(self):
         """
         This function checks the navdb of BlueSky. If any of the points in the downloaded flightplan
-        is not yet in the navdb, then it adds them to the navdb permanently. 
-        
-
-        WARNING
-        -------
-        CURRRENTLY IT GIVES AN OVERFLOW ERROR MESSAGE AND BLUESKY WILL CRASH - WORK IN PROGRESS
+        is not yet in the navdb, then it adds them to the navdb for this user sessions. 
         """
 
         for node in range(len(self.nodeIdent)):
-            for wpt in navdb.wpid:
-                if wpt == self.nodeIdent[node]:
-                    # WPT is already in navdb
-                    pass
+            if self.nodeIdent[node] in navdb.wpid:
+                # WPT is already in navdb
+                pass
+            else:
+                # Add WPT to navdb for this user session based on wpt type
+                if self.nodeType[node] == 'VOR' or self.nodeType[node] == 'NDB' or self.nodeType[node] == 'ILS' or self.nodeType[node] == 'LOC' or self.nodeType[node] == 'GS' or self.nodeType[node] == 'OM' or self.nodeType[node] == 'MM' or self.nodeType[node] == 'IM' or self.nodeType[node] == 'DME' or self.nodeType[node] == 'TACAN' or self.nodeType[node] == 'FIX':
+                    navdb.defwpt(self.nodeIdent[node],self.nodeLat[node],self.nodeLon[node],self.nodeType[node])
                 else:
-                    # Add WPT to navdb based on wpt type
-                    if self.nodeType[node] == 'VOR' or self.nodeType[node] == 'NDB' or self.nodeType[node] == 'ILS' or self.nodeType[node] == 'LOC' or self.nodeType[node] == 'GS' or self.nodeType[node] == 'OM' or self.nodeType[node] == 'MM' or self.nodeType[node] == 'IM' or self.nodeType[node] == 'DME' or self.nodeType[node] == 'TACAN' or self.nodeType[node] == 'FIX':
-                        navdb.defwpt(self.nodeIdent[node],self.nodeLat[node],self.nodeLon[node],self.nodeType[node])
-                    else:
-                        pass
+                    pass
 
-    def addToDB(self):
+    def addAllWPTToDB(self):
         """
         This function adds all the points of the downloaded flightplan to the current user database.
         The database is used only for the current simulation, so the points are removed after the simulation ends.
@@ -159,19 +153,81 @@ class Route():
             else:
                 pass
 
-    def addWPT(self): # Adds all waypoints to route
+    def setOrig(self):
+        """
+        This function sets the origin of the route
+        """
+
+        stack.stack("ORIG "+self.acid+" "+self.fromICAO)
+
+    def addEHAMSid(self):
+        """
+        This function automatically adds a random SID if the plane departs from EHAM (Schiphol)
+        """
+
+        SIDs = []
+        keySID = 'SID-'
+        for fname in os.listdir('scenario/eham'):
+            if keySID in fname:
+                sidFName = fname
+                SIDs.append('eham/'+fname)
+
+        rndmSID = SIDs[np.random.randint(0,len(SIDs))]
+        if self.fromICAO == "EHAM":
+            stack.stack("pcall "+rndmSID+" "+self.acid+" abs")
+
+        
+    def addWPTToRoute(self):
         """
         This function adds all the points in the downloaded flightplan to the current route of an aircraft. 
         The route then ceated is a 3D trajectory.
-        It also automatically deletes the flight when it reaches it destination.
         """
 
-        stack.stack("ORIG "+self.acid+" "+self.fromICAO) # Add origin
+        for node in range(len(self.nodeIdent)):    
+            if self.nodeType == 'VOR' or self.nodeType[node] == 'NDB' or self.nodeType[node] == 'ILS' or self.nodeType[node] == 'LOC' or self.nodeType[node] == 'GS' or self.nodeType[node] == 'OM' or self.nodeType[node] == 'MM' or self.nodeType[node] == 'IM' or self.nodeType[node] == 'DME' or self.nodeType[node] == 'TACAN' or self.nodeType[node] == 'FIX':      
+                stack.stack(self.acid+" ADDWPT "+self.nodeIdent[node]+" "+str(self.nodeAlt[node]))
 
-        for node in range(len(self.nodeIdent)): # Add all waypoints           
-            stack.stack("ADDWPT "+self.acid+" "+self.nodeIdent[node]+" "+str(self.nodeAlt[node]))
-        stack.stack("DEST "+self.acid+" "+self.toICAO) # Add destination
-        stack.stack(self.acid+" AT "+self.toICAO+" DO DEL "+self.acid) # Remove flight when at destination
+    def addEHAMStar(self):
+        """
+        This function automatically adds a random STAR if the plane arrives at EHAM (Schiphol)
+        """
+
+        STARs = []
+        keySTAR = 'STAR-'
+        for fname in os.listdir('scenario/eham/'):
+            if keySTAR in fname:
+                STARs.append('eham/'+fname)
+
+        rndmSTAR = STARs[np.random.randint(0,len(STARs))]
+        if self.toICAO == "EHAM":
+            stack.stack("pcall "+rndmSTAR+" "+self.acid+" abs")
+
+    def setDest(self):
+        """
+        This function sets the destination of the route
+        """
+
+        stack.stack("DEST "+self.acid+" "+self.toICAO)       
+        
+    def removeAtDest(self):
+        """
+        This function removes a flight when it reaches its destination.
+        """
+
+        stack.stack(self.acid+" AT "+self.toICAO+" DO DEL "+self.acid) 
+
+    def createReturn(self):
+        """
+        This function will have an aircraft hold at its destination for 1 hour and 
+        then create a return route back to the origin.
+
+        WARNING
+        -------
+        CURRENTLY BLUESKY DOES NOT RECOGNIZE 'delay' AS A VALID STACK COMMAND TO DO 'at' A CERTAIN POINT - WORK IN PROGRESS
+        """
+
+        returnCMD = "DELAY 01:00:00.00, fplr "+self.acid+" "+self.toICAO+" "+self.fromICAO
+        stack.stack(self.acid+" AT "+self.toICAO+" DO STACK "+returnCMD)
 
 @stack.command(name='FPLR')
 def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
@@ -186,11 +242,18 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
     toICAO: str
         airport of arrival in ICAO format
     """
+
+    stack.stack("pause")
     r = Route(acid,fromICAO, toICAO)
     r.generate_fltplan()
     r.download_fltplan_data()
-    #r.checkDB()
-    r.addToDB()
-    r.addWPT()
+    r.checkDB()
+    r.setOrig()
+    r.addEHAMSid()
+    r.addWPTToRoute()
+    r.addEHAMStar()
+    r.setDest()
+    r.removeAtDest() # or r.createReturn()
     stack.stack(acid+" lnav on")
     stack.stack(acid+" vnav on")
+    stack.stack("op")
