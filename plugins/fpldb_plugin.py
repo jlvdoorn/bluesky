@@ -3,10 +3,10 @@ based on a user input for point of departure and arrival using Flight Plan Datab
 It then compares the points in this routes with the existing nav database in bluesky.
 If the points are not already present, it will add them to the database."""
 
-###################### TODO ###########################
-# Implement SID/STAR                                  #
-# Add auto return flight after time interval - Option #
-#######################################################
+###################### TODO #################################
+# Implement SID/STAR Runway selection                       #
+# Add auto return flight - NOT POSSIBLE (INVALID STACK CMD) #
+#############################################################
 
 
 # Import the global bluesky objects. Uncomment the ones you need
@@ -438,7 +438,7 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
     """
 
     stack.stack("pause")
-    r = Route(acid,fromICAO, toICAO);                       print('                                                  ')
+    r = Route(acid,fromICAO, toICAO); acid = acid.upper();  print('                                                  ')
     r.generate_fltplan();                                   print(acid+': Generated FPL')
     r.download_fltplan_data();                              print(acid+': Downloaded FPL')
     r.checkDB();                                            print(acid+': Checked DB')
