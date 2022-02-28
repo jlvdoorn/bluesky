@@ -4,7 +4,7 @@ It then compares the points in this routes with the existing nav database in blu
 If the points are not already present, it will add them to the database."""
 
 ###################### TODO #################################
-# Implement SID/STAR Runway selection                       #
+# Implement Runway selection depending on SID/STAR          #
 # Add auto return flight - NOT POSSIBLE (INVALID STACK CMD) #
 #############################################################
 
