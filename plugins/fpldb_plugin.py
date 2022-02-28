@@ -4,7 +4,7 @@ It then compares the points in this routes with the existing nav database in blu
 If the points are not already present, it will add them to the database."""
 
 ###################### TODO #################################
-# Implement Runway selection depending on SID/STAR          #
+# Implement taxiing to departure runway if from eham        #
 # Add auto return flight - NOT POSSIBLE (INVALID STACK CMD) #
 #############################################################
 
@@ -345,7 +345,21 @@ class Route():
             SIDs = self.sidSpijk    
 
         rndmSID = SIDs[np.random.randint(0,len(SIDs))]
+        
+        # Function that determines the runway from the SID
+        if '04' in rndmSID: self.sidRWY = '04'
+        elif '06' in rndmSID: self.sidRWY = '06'
+        elif '09' in rndmSID: self.sidRWY = '09'
+        elif '18C' in rndmSID: self.sidRWY = '18C'
+        elif '18L' in rndmSID: self.sidRWY = '18L'
+        elif '22' in rndmSID: self.sidRWY = '22'
+        elif '24' in rndmSID: self.sidRWY = '24'
+        elif '27' in rndmSID: self.sidRWY = '27'
+        elif '36C' in rndmSID: self.sidRWY = '36C'
+        elif '36L' in rndmSID: self.sidRWY = '36L'
+        
         stack.stack("pcall eham/deffix.scn")
+        stack.stack("ORIG "+self.acid+" "+self.fromICAO+"/RWY"+self.sidRWY)
         stack.stack("pcall "+rndmSID+" "+self.acid+" abs")
         
     def addWPTToRoute(self):
@@ -391,7 +405,12 @@ class Route():
             STARs = self.starPeser
 
         rndmSTAR = STARs[np.random.randint(0,len(STARs))]
+
+        RWYs = ['04','06','09','18C','18L','22','24','27','36C','36L']
+        self.starRWY = RWYs[np.random.randint(0,len(RWYs))]
+
         stack.stack("pcall eham/deffix.scn")
+        stack.stack("DEST "+self.acid+" "+self.toICAO+"/RWY"+self.starRWY)
         stack.stack("pcall "+rndmSTAR+" "+self.acid+" abs")
 
     def setDest(self):
@@ -442,11 +461,11 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
     r.generate_fltplan();                                   print(acid+': Generated FPL')
     r.download_fltplan_data();                              print(acid+': Downloaded FPL')
     r.checkDB();                                            print(acid+': Checked DB')
-    r.setOrig();                                            print(acid+': Origin Set')
+    if fromICAO != "EHAM": r.setOrig();                     print(acid+': Origin Set')
     if fromICAO == "EHAM": r.addEHAMSid();                  print(acid+': SID Selected')
     r.addWPTToRoute();                                      print(acid+': Waypoints added to route')
     if toICAO == "EHAM": r.addEHAMStar();                   print(acid+': STAR Selected')
-    r.setDest();                                            print(acid+': Destination Set')
+    if toICAO != "EHAM": r.setDest();                       print(acid+': Destination Set')
     r.removeAtDest();                                       print('Flight '+acid+' will be deleted upon arrival')
     stack.stack(acid+" lnav on");                           print('                                                  ')
     stack.stack(acid+" vnav on")
