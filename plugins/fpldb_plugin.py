@@ -11,6 +11,7 @@ If the points are not already present, it will add them to the database."""
 
 # Import the global bluesky objects. Uncomment the ones you need
 from bluesky import core, stack, traf, settings, navdb, sim, scr, tools
+from bluesky.tools import calculator
 import requests, json
 import numpy as np
 import os, time
@@ -123,11 +124,138 @@ class Route():
         self.nodeLon = nodeLon
         self.nodeAlt = nodeAlt
         self.nodeVia = nodeVia
-            
+
+    def calcDirOut(self):
+        """
+        This function calculates the direction from the origin to the first wpt.
+        """
+
+        lata = self.nodeLat[0]
+        lona = self.nodeLon[0]
+        latb = self.nodeLat[1]
+        lonb = self.nodeLon[1]
+        dirOut = calculator.qdr(lata,lona,latb,lonb) # Degrees
+        if dirOut < 0:
+            dirOut = dirOut + 360       
+        return dirOut  
+    
+    def calcDirIn(self):
+        """
+        This function calculates the direction from the last wpt to the destination.
+        """
+
+        lata = self.nodeLat[-2]
+        lona = self.nodeLon[-2]
+        latb = self.nodeLat[-1]
+        lonb = self.nodeLon[-1]
+        dirIn = calculator.qdr(lata,lona,latb,lonb) # Degrees
+        if dirIn < 0:
+            dirIn = dirIn + 360
+        return dirIn
+
+    def findEHAMSid(self):
+        """
+        This function finds and lists all the SIDs for EHAM.
+        """
+
+        sidAndik = []; keyAndik = 'ANDIK'
+        sidArnem = []; keyArnem = 'ARNEM'
+        sidBergi = []; keyBergi = 'BERGI'
+        sidGorlo = []; keyGorlo = 'GORLO'
+        sidKudad = []; keyKudad = 'KUDAD'
+        sidLopik = []; keyLopik = 'LOPIK'
+        sidRendi = []; keyRendi = 'RENDI'
+        sidValko = []; keyValko = 'VALKO'
+        sidBetus = []; keyBetus = 'BETUS'
+        sidDenag = []; keyDenag = 'DENAG'
+        sidEdupo = []; keyEdupo = 'EDUPO'
+        sidElpat = []; keyElpat = 'ELPAT'
+        sidLaras = []; keyLaras = 'LARAS'
+        sidRoven = []; keyRoven = 'ROVEN'
+        sidTorga = []; keyTorga = 'TORGA'
+        sidWispa = []; keyWispa = 'WISPA'
+        sidLekko = []; keyLekko = 'LEKKO'
+        sidSpijk = []; keySpijk = 'SPIJKERBOOR'
+        sidIvlut = []; keyIvlut = 'IVLUT'
+        sidNopsu = []; keyNopsu = 'NOPSU'
+        sidNyker = []; keyNyker = 'NYKER'
+        sidOgina = []; keyOgina = 'OGINA'
+        sidWoody = []; keyWoody = 'WOODY'
+
+        for fname in os.listdir('scenario/eham'):
+            if keyAndik in fname: sidAndik.append('eham/'+fname)
+            elif keyArnem in fname: sidArnem.append('eham/'+fname)
+            elif keyBergi in fname: sidBergi.append('eham/'+fname)
+            elif keyGorlo in fname: sidGorlo.append('eham/'+fname)
+            elif keyKudad in fname: sidKudad.append('eham/'+fname)
+            elif keyLopik in fname: sidLopik.append('eham/'+fname)
+            elif keyRendi in fname: sidRendi.append('eham/'+fname)
+            elif keyValko in fname: sidValko.append('eham/'+fname)
+            elif keyBetus in fname: sidBetus.append('eham/'+fname)
+            elif keyDenag in fname: sidDenag.append('eham/'+fname)
+            elif keyEdupo in fname: sidEdupo.append('eham/'+fname)
+            elif keyElpat in fname: sidElpat.append('eham/'+fname)
+            elif keyLaras in fname: sidLaras.append('eham/'+fname)
+            elif keyRoven in fname: sidRoven.append('eham/'+fname)
+            elif keyTorga in fname: sidTorga.append('eham/'+fname)
+            elif keyWispa in fname: sidWispa.append('eham/'+fname)
+            elif keyLekko in fname: sidLekko.append('eham/'+fname)
+            elif keySpijk in fname: sidSpijk.append('eham/'+fname)
+            elif keyIvlut in fname: sidIvlut.append('eham/'+fname)
+            elif keyNopsu in fname: sidNopsu.append('eham/'+fname)
+            elif keyNyker in fname: sidNyker.append('eham/'+fname)
+            elif keyOgina in fname: sidOgina.append('eham/'+fname)
+            elif keyWoody in fname: sidWoody.append('eham/'+fname)
+
+        self.sidAndik = sidAndik; self.sidArnem = sidArnem; self.sidBergi = sidBergi; self.sidGorlo = sidGorlo; self.sidKudad = sidKudad
+        self.sidLopik = sidLopik; self.sidRendi = sidRendi; self.sidValko = sidValko; self.sidBetus = sidBetus; self.sidDenag = sidDenag
+        self.sidEdupo = sidEdupo; self.sidElpat = sidElpat; self.sidLaras = sidLaras; self.sidRoven = sidRoven; self.sidTorga = sidTorga
+        self.sidWispa = sidWispa; self.sidLekko = sidLekko; self.sidSpijk = sidSpijk; self.sidIvlut = sidIvlut; self.sidNopsu = sidNopsu
+        self.sidNyker = sidNyker; self.sidOgina = sidOgina; self.sidWoody = sidWoody
+    
+    def findEHAMStar(self):
+        """
+        This function finds and lists al the STARS for EHAM.
+        """
+        starDenut = []; keyDenut = 'DENUT'
+        starEelde1A = []; keyEelde1A = 'EELDE-1A'
+        starEelde1B = []; keyEelde1B = 'EELDE-1B'
+        starHelen = []; keyHelen = 'HELEN'
+        starLamso = []; keyLamso = 'LAMSO'
+        starMolix = []; keyMolix = 'MOLIX'
+        starNorku2A = []; keyNorku2A = 'NORKU-2A'
+        starNorku2B = []; keyNorku2B = 'NORKU-2B'
+        starPeser = []; keyPeser = 'PESER'
+        starPutty = []; keyPutty = 'PUTTY'
+        starRedfa = []; keyRedfa = 'REDFA'
+        starRekken2A = []; keyRekken2A = 'REKKEN-2A'
+        starRekken2B = []; keyRekken2B = 'REKKEN-2B'
+        starToppa = []; keyToppa = 'TOPPA'
+
+        for fname in os.listdir('scenario/eham'):
+            if keyDenut in fname: starDenut.append('eham/'+fname)
+            elif keyEelde1A in fname: starEelde1A.append('eham/'+fname)
+            elif keyEelde1B in fname: starEelde1B.append('eham/'+fname)
+            elif keyHelen in fname: starHelen.append('eham/'+fname)
+            elif keyLamso in fname: starLamso.append('eham/'+fname)
+            elif keyMolix in fname: starMolix.append('eham/'+fname)
+            elif keyNorku2A in fname: starNorku2A.append('eham/'+fname)
+            elif keyNorku2B in fname: starNorku2B.append('eham/'+fname)
+            elif keyPeser in fname: starPeser.append('eham/'+fname)
+            elif keyPutty in fname: starPutty.append('eham/'+fname)
+            elif keyRedfa in fname: starRedfa.append('eham/'+fname)
+            elif keyRekken2A in fname: starRekken2A.append('eham/'+fname)
+            elif keyRekken2B in fname: starRekken2B.append('eham/'+fname)
+            elif keyToppa in fname: starToppa.append('eham/'+fname)
+
+        self.starDenut = starDenut; self.starEelde1A = starEelde1A; self.starEelde1B = starEelde1B; self.starHelen = starHelen; self.starLamso = starLamso
+        self.starMolix = starMolix; self.starNorku2A = starNorku2A; self.starNorku2B = starNorku2B; self.starPeser = starPeser; self.starPutty = starPutty
+        self.starRedfa = starRedfa; self.starRekken2A = starRekken2A; self.starRekken2B = starRekken2B; self.keyToppa = starToppa
+
     def checkDB(self):
         """
         This function checks the navdb of BlueSky. If any of the points in the downloaded flightplan
-        is not yet in the navdb, then it adds them to the navdb for this user sessions. 
+        is not yet in the navdb, then it adds them to the navdb for this user session. 
         """
 
         for node in range(len(self.nodeIdent)):
@@ -143,7 +271,7 @@ class Route():
 
     def addAllWPTToDB(self):
         """
-        This function adds all the points of the downloaded flightplan to the current user database.
+        This function adds all the points of the downloaded flightplan to the database.
         The database is used only for the current simulation, so the points are removed after the simulation ends.
         """
 
@@ -162,20 +290,63 @@ class Route():
 
     def addEHAMSid(self):
         """
-        This function automatically adds a random SID if the plane departs from EHAM (Schiphol)
+        This function automatically adds a SID if the plane departs from EHAM (Schiphol).
+        The chosen SID depends on the direction of the first waypoint (see calcDirOut()). 
         """
 
-        SIDs = []
-        keySID = 'SID-'
-        for fname in os.listdir('scenario/eham'):
-            if keySID in fname:
-                sidFName = fname
-                SIDs.append('eham/'+fname)
+        self.findEHAMSid()
+
+        dirOut = self.calcDirOut()
+        if dirOut >= 16.5 and dirOut < 26.5:
+            SIDs = self.sidNopsu
+        elif dirOut >= 26.5 and dirOut < 32.5:
+            SIDs = self.sidBetus
+        elif dirOut >= 32.5 and dirOut < 38.5:
+            SIDs = self.sidAndik
+        elif dirOut >= 38.5 and dirOut < 70.5:
+            SIDs = self.sidTorga
+        elif dirOut >= 70.5 and dirOut < 99:
+            SIDs = self.sidNyker
+        elif dirOut >= 99 and dirOut < 101:
+            SIDs = self.sidIvlut
+        elif dirOut >= 101 and dirOut < 102.5:
+            SIDs = self.sidElpat
+        elif dirOut >= 102.5 and dirOut < 107.5:
+            SIDs = self.sidArnem
+        elif dirOut >= 107.5 and dirOut < 113.5:
+            SIDs = self.sidRendi
+        elif dirOut >= 113.5 and dirOut < 126.5:
+            SIDs = self.sidEdupo
+        elif dirOut >= 126.5 and dirOut < 142:
+            SIDs = self.sidOgina   
+        elif dirOut >= 142 and dirOut < 146.5:
+            SIDs = self.sidRoven  
+        elif dirOut >= 146.5 and dirOut < 162.5:
+            SIDs = self.sidLopik  
+        elif dirOut >= 162.5 and dirOut < 180.5:
+            SIDs = self.sidLekko  
+        elif dirOut >= 180.5 and dirOut < 186:
+            SIDs = self.sidLaras
+        elif dirOut >= 186 and dirOut < 191:
+            SIDs = self.sidKudad  
+        elif dirOut >= 191 and dirOut < 219:
+            SIDs = self.sidWoody  
+        elif dirOut >= 219 and dirOut < 245.5:
+            SIDs = self.sidValko  
+        elif dirOut >= 245.5 and dirOut < 258.5:
+            SIDs = self.sidDenag 
+        elif dirOut >= 258.5 and dirOut < 298.5:
+            SIDs = self.sidGorlo
+        elif dirOut >= 298.5 and dirOut < 327.5:
+            SIDs = self.sidWispa  
+        elif dirOut >= 327.5 and dirOut < 350:
+            SIDs = self.sidBergi  
+        elif dirOut >= 350 or dirOut < 16.5:
+            SIDs = self.sidSpijk    
 
         rndmSID = SIDs[np.random.randint(0,len(SIDs))]
-        if self.fromICAO == "EHAM":
-            stack.stack("pcall "+rndmSID+" "+self.acid+" abs")
-
+        stack.stack("pcall eham/deffix.scn")
+        stack.stack("pcall "+rndmSID+" "+self.acid+" abs")
         
     def addWPTToRoute(self):
         """
@@ -190,17 +361,38 @@ class Route():
     def addEHAMStar(self):
         """
         This function automatically adds a random STAR if the plane arrives at EHAM (Schiphol)
+        The chosen STAR depends on the direction of the last waypoint (see calcDirIn()).
         """
 
-        STARs = []
-        keySTAR = 'STAR-'
-        for fname in os.listdir('scenario/eham/'):
-            if keySTAR in fname:
-                STARs.append('eham/'+fname)
+        self.findEHAMStar()
+
+        dirIn = self.calcDirIn()
+        if dirIn >= 13 and dirIn < 19.5:
+            STARs = self.starPutty
+        elif dirIn >= 19.5 and dirIn < 28:
+            STARs = self.starHelen
+        elif dirIn >= 28 and dirIn < 55.5:
+            STARs = self.starDenut
+        elif dirIn >= 55.5 and dirIn < 94.5:
+            STARs = self.starRedfa
+        elif dirIn >= 94.5 and dirIn < 111.5:
+            STARs = self.starLamso
+        elif dirIn >= 111.5 and dirIn < 129:
+            STARs = self.starMolix
+        elif dirIn >= 129 and dirIn < 188:
+            STARs = self.starToppa
+        elif dirIn >= 188 and dirIn < 252:
+            STARs = np.concatenate((self.starEelde1A, self.starEelde1B))
+        elif dirIn >= 252 and dirIn < 274:
+            STARs = np.concatenate((self.starNorku2A, self.starNorku2B))
+        elif dirIn >= 274 and dirIn < 324:
+            STARs = np.concatenate((self.starRekken2A, self.starRekken2B))
+        elif dirIn >= 324 or dirIn < 13:
+            STARs = self.starPeser
 
         rndmSTAR = STARs[np.random.randint(0,len(STARs))]
-        if self.toICAO == "EHAM":
-            stack.stack("pcall "+rndmSTAR+" "+self.acid+" abs")
+        stack.stack("pcall eham/deffix.scn")
+        stack.stack("pcall "+rndmSTAR+" "+self.acid+" abs")
 
     def setDest(self):
         """
@@ -237,6 +429,8 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
 
     Parameters
     ----------
+    acid: str
+        callsign of the aircraft to create a route for (ex: KL575)
     fromICAO: str
         airport of departure in ICAO format
     toICAO: str
@@ -244,16 +438,16 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
     """
 
     stack.stack("pause")
-    r = Route(acid,fromICAO, toICAO)
-    r.generate_fltplan()
-    r.download_fltplan_data()
-    r.checkDB()
-    r.setOrig()
-    r.addEHAMSid()
-    r.addWPTToRoute()
-    r.addEHAMStar()
-    r.setDest()
-    r.removeAtDest() # or r.createReturn()
-    stack.stack(acid+" lnav on")
+    r = Route(acid,fromICAO, toICAO);                       print('                                                  ')
+    r.generate_fltplan();                                   print(acid+': Generated FPL')
+    r.download_fltplan_data();                              print(acid+': Downloaded FPL')
+    r.checkDB();                                            print(acid+': Checked DB')
+    r.setOrig();                                            print(acid+': Origin Set')
+    if fromICAO == "EHAM": r.addEHAMSid();                  print(acid+': SID Selected')
+    r.addWPTToRoute();                                      print(acid+': Waypoints added to route')
+    if toICAO == "EHAM": r.addEHAMStar();                   print(acid+': STAR Selected')
+    r.setDest();                                            print(acid+': Destination Set')
+    r.removeAtDest();                                       print('Flight '+acid+' will be deleted upon arrival')
+    stack.stack(acid+" lnav on");                           print('                                                  ')
     stack.stack(acid+" vnav on")
     stack.stack("op")
