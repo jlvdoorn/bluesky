@@ -6,7 +6,6 @@ If the points are not already present, it will add them to the database."""
 ###################### TODO #################################
 # Implement taxiing to departure runway if from eham        #
 # Add auto return flight - NOT POSSIBLE (INVALID STACK CMD) #
-# Test commit ----------------------------------------------#
 #############################################################
 
 
@@ -407,7 +406,7 @@ class Route():
 
         rndmSTAR = STARs[np.random.randint(0,len(STARs))]
 
-        RWYs = ['04','06','09','18C','18L','22','24','27','36C','36L']
+        RWYs = ['04','06','09','18C','18L','22','24','27','36C','36L'] # TODO: Change according to qdr
         self.starRWY = RWYs[np.random.randint(0,len(RWYs))]
 
         stack.stack("pcall eham/deffix.scn")
