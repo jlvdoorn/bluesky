@@ -1,7 +1,13 @@
-""" BlueSky Flight Plan Database plugin. This plugin can auto create a route 
+""" 
+BlueSky Flight Plan Database plugin. This plugin can auto create a route 
 based on a user input for point of departure and arrival using Flight Plan Database.
 It then compares the points in this routes with the existing nav database in bluesky.
-If the points are not already present, it will add them to the database."""
+If the points are not already present, it will add them to the database.
+
+Jan Laurenszoon van Doorn, 2022
+Joost Ellerbroek, 2022
+Jacco Hoekstra, 2022
+"""
 
 ###################### TODO #################################
 # Implement taxiing to departure runway if from eham        #
