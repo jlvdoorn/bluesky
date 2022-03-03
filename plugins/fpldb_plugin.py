@@ -469,7 +469,10 @@ class Route():
         This function removes a flight when it reaches its destination.
         """
 
-        stack.stack(self.acid+" AT "+self.toICAO+" DO DEL "+self.acid) 
+        if self.rndmDestRWY:
+            stack.stack(self.acid+" AT "+self.toICAO+"/RWY"+self.rndmDestRWY+" DO DEL "+self.acid) 
+        elif self.starRWY:
+            stack.stack(self.acid+" AT "+self.toICAO+"/RWY"+self.starRWY+" DO DEL "+self.acid)
 
     def createReturn(self):
         """
