@@ -10,7 +10,6 @@ Jacco Hoekstra, 2022
 """
 
 ###################### TODO #################################
-# Implement taxiing to departure runway if from eham        #
 # Add auto return flight - NOT POSSIBLE (INVALID STACK CMD) #
 #############################################################
 
@@ -20,7 +19,7 @@ from bluesky import core, stack, traf, settings, navdb, sim, scr, tools
 from bluesky.tools import calculator
 import requests, json
 import numpy as np
-import os, time
+import os, time, re
 
 ### Initialization function of your plugin. Do not change the name of this
 ### function, as it is the way BlueSky recognises this file as a plugin.
@@ -292,7 +291,23 @@ class Route():
         This function sets the origin of the route
         """
 
-        stack.stack("ORIG "+self.acid+" "+self.fromICAO)
+        # Find all available runways and randomly choose one to depart from.
+        origAptInfo = navdb.rwythresholds[self.fromICAO]
+        origRWYs = []
+        for k in range(0,len(origAptInfo)):
+            print(k)
+            origRWYs.append(list(origAptInfo)[k])
+        
+        self.rndmOrigRWY = origRWYs[np.random.randint(0,len(origRWYs))]
+
+        # Find the runway heading
+        res = re.findall('(\d+|[A-Za-z]+)',self.rndmOrigRWY)
+        self.rndmOrigRwyHDG = int(res[0])*10
+
+        # Move the aircraft to the selected runway and give it the correct heading
+        stack.stack("MOVE "+self.acid+" "+self.fromICAO+"/RWY"+self.rndmOrigRWY)
+        stack.stack("HDG "+self.acid+" "+str(self.rndmOrigRwyHDG))
+        stack.stack("ORIG "+self.acid+" "+self.fromICAO+"/RWY"+self.rndmOrigRWY)
 
     def addEHAMSid(self):
         """
@@ -351,20 +366,23 @@ class Route():
             SIDs = self.sidSpijk    
 
         rndmSID = SIDs[np.random.randint(0,len(SIDs))]
+        self.rndmSID = rndmSID
         
         # Function that determines the runway from the SID
-        if '04' in rndmSID: self.sidRWY = '04'
-        elif '06' in rndmSID: self.sidRWY = '06'
-        elif '09' in rndmSID: self.sidRWY = '09'
-        elif '18C' in rndmSID: self.sidRWY = '18C'
-        elif '18L' in rndmSID: self.sidRWY = '18L'
-        elif '22' in rndmSID: self.sidRWY = '22'
-        elif '24' in rndmSID: self.sidRWY = '24'
-        elif '27' in rndmSID: self.sidRWY = '27'
-        elif '36C' in rndmSID: self.sidRWY = '36C'
-        elif '36L' in rndmSID: self.sidRWY = '36L'
-        
+        if '04' in rndmSID: self.sidRWY = '04'; self.sidRwyHdg = 40
+        elif '06' in rndmSID: self.sidRWY = '06'; self.sidRwyHdg = 60
+        elif '09' in rndmSID: self.sidRWY = '09'; self.sidRwyHdg = 90
+        elif '18C' in rndmSID: self.sidRWY = '18C'; self.sidRwyHdg = 180
+        elif '18L' in rndmSID: self.sidRWY = '18L'; self.sidRwyHdg = 180
+        elif '22' in rndmSID: self.sidRWY = '22'; self.sidRwyHdg = 220
+        elif '24' in rndmSID: self.sidRWY = '24'; self.sidRwyHdg = 240
+        elif '27' in rndmSID: self.sidRWY = '27'; self.sidRwyHdg = 270
+        elif '36C' in rndmSID: self.sidRWY = '36C'; self.sidRwyHdg = 360
+        elif '36L' in rndmSID: self.sidRWY = '36L'; self.sidRwyHdg = 360
+
         stack.stack("pcall eham/deffix.scn")
+        stack.stack("move "+self.acid+" "+self.fromICAO+"/RWY"+self.sidRWY)
+        stack.stack("hdg "+self.acid+" "+str(self.sidRwyHdg))
         stack.stack("ORIG "+self.acid+" "+self.fromICAO+"/RWY"+self.sidRWY)
         stack.stack("pcall "+rndmSID+" "+self.acid+" abs")
         
@@ -382,6 +400,7 @@ class Route():
         """
         This function automatically adds a random STAR if the plane arrives at EHAM (Schiphol)
         The chosen STAR depends on the direction of the last waypoint (see calcDirIn()).
+        Furthermore, it also adds a random runway to land on based on this direction. 
         """
 
         self.findEHAMStar()
@@ -410,21 +429,40 @@ class Route():
         elif dirIn >= 324 or dirIn < 13:
             STARs = self.starPeser
 
-        rndmSTAR = STARs[np.random.randint(0,len(STARs))]
+        self.rndmSTAR = STARs[np.random.randint(0,len(STARs))]
 
-        RWYs = ['04','06','09','18C','18L','22','24','27','36C','36L'] # TODO: Change according to qdr
-        self.starRWY = RWYs[np.random.randint(0,len(RWYs))]
+        starRWYs = []
+        dirIn = self.calcDirIn()
+        if dirIn >= 20 and dirIn < 50: starRWYs.append('04')
+        elif dirIn >= 50 and dirIn < 75: starRWYs.append('06')
+        elif dirIn >= 75 and dirIn < 135: starRWYs.append('09')
+        elif dirIn >= 135 and dirIn < 200: starRWYs.append('18C'); starRWYs.append('18L'); starRWYs.append('18R')
+        elif dirIn >= 200 and dirIn < 230: starRWYs.append('22')
+        elif dirIn >= 230 and dirIn < 255: starRWYs.append('24')
+        elif dirIn >= 255 and dirIn < 315: starRWYs.append('27')
+        elif dirIn >= 315 or dirIn < 20: starRWYs.append('36C'); starRWYs.append('36R')
+
+        runwaySTAR = starRWYs[np.random.randint(0,len(starRWYs))]
+        self.starRWY = runwaySTAR
 
         stack.stack("pcall eham/deffix.scn")
         stack.stack("DEST "+self.acid+" "+self.toICAO+"/RWY"+self.starRWY)
-        stack.stack("pcall "+rndmSTAR+" "+self.acid+" abs")
+        stack.stack("pcall "+self.rndmSTAR+" "+self.acid+" abs")
 
     def setDest(self):
         """
         This function sets the destination of the route
         """
 
-        stack.stack("DEST "+self.acid+" "+self.toICAO)       
+        destAptInfo = navdb.rwythresholds[self.toICAO]
+        destRWYs = []
+        for k in range(0,len(destAptInfo)):
+            print(k)
+            destRWYs.append(list(destAptInfo)[k])
+        
+        self.rndmDestRWY = destRWYs[np.random.randint(0,len(destRWYs))]
+    	
+        stack.stack("DEST "+self.acid+" "+self.toICAO+"/RWY"+self.rndmDestRWY)       
         
     def removeAtDest(self):
         """
@@ -467,12 +505,11 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
     r.generate_fltplan();                                   print(acid+': Generated FPL')
     r.download_fltplan_data();                              print(acid+': Downloaded FPL')
     r.checkDB();                                            print(acid+': Checked DB')
-    if fromICAO != "EHAM": r.setOrig();                     print(acid+': Origin Set')
-    if fromICAO == "EHAM": r.addEHAMSid();                  print(acid+': SID Selected')
+    if fromICAO.upper() != "EHAM": r.setOrig();             print(acid+': Origin Set')
+    if fromICAO.upper() == "EHAM": r.addEHAMSid();          print(acid+': SID Selected '+r.rndmSID+" "+r.sidRWY)
     r.addWPTToRoute();                                      print(acid+': Waypoints added to route')
-    if toICAO == "EHAM": r.addEHAMStar();                   print(acid+': STAR Selected')
-    if toICAO != "EHAM": r.setDest();                       print(acid+': Destination Set')
+    if toICAO.upper() == "EHAM": r.addEHAMStar();           print(acid+': STAR Selected '+r.rndmSTAR+" "+r.starRWY)
+    if toICAO.upper() != "EHAM": r.setDest();               print(acid+': Destination Set')
     r.removeAtDest();                                       print('Flight '+acid+' will be deleted upon arrival')
     stack.stack(acid+" lnav on");                           print('                                                  ')
     stack.stack(acid+" vnav on")
-    stack.stack("op")
