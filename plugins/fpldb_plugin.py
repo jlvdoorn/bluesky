@@ -255,7 +255,7 @@ class Route():
 
         self.starDenut = starDenut; self.starEelde1A = starEelde1A; self.starEelde1B = starEelde1B; self.starHelen = starHelen; self.starLamso = starLamso
         self.starMolix = starMolix; self.starNorku2A = starNorku2A; self.starNorku2B = starNorku2B; self.starPeser = starPeser; self.starPutty = starPutty
-        self.starRedfa = starRedfa; self.starRekken2A = starRekken2A; self.starRekken2B = starRekken2B; self.keyToppa = starToppa
+        self.starRedfa = starRedfa; self.starRekken2A = starRekken2A; self.starRekken2B = starRekken2B; self.starToppa = starToppa
 
     def checkDB(self):
         """
@@ -295,7 +295,6 @@ class Route():
         origAptInfo = navdb.rwythresholds[self.fromICAO]
         origRWYs = []
         for k in range(0,len(origAptInfo)):
-            print(k)
             origRWYs.append(list(origAptInfo)[k])
         
         self.rndmOrigRWY = origRWYs[np.random.randint(0,len(origRWYs))]
@@ -457,7 +456,6 @@ class Route():
         destAptInfo = navdb.rwythresholds[self.toICAO]
         destRWYs = []
         for k in range(0,len(destAptInfo)):
-            print(k)
             destRWYs.append(list(destAptInfo)[k])
         
         self.rndmDestRWY = destRWYs[np.random.randint(0,len(destRWYs))]
@@ -503,8 +501,10 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
         airport of arrival in ICAO format
     """
 
+    fromICAO = fromICAO.upper(); toICAO = toICAO.upper(); acid = acid.upper()
+
     stack.stack("pause")
-    r = Route(acid,fromICAO, toICAO); acid = acid.upper();  print('                                                  ')
+    r = Route(acid,fromICAO, toICAO);                       print('                                                  ')
     r.generate_fltplan();                                   print(acid+': Generated FPL')
     r.download_fltplan_data();                              print(acid+': Downloaded FPL')
     r.checkDB();                                            print(acid+': Checked DB')
@@ -516,3 +516,4 @@ def createRoute(acid: str,fromICAO: str = "EHAM",toICAO: str = "LFMN"):
     r.removeAtDest();                                       print('Flight '+acid+' will be deleted upon arrival')
     stack.stack(acid+" lnav on");                           print('                                                  ')
     stack.stack(acid+" vnav on")
+    stack.stack("Echo Route created for "+acid)
