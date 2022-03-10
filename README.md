@@ -25,4 +25,4 @@ https://flightplandatabase.com/dev/api
 This plugin is build for the use together with [bluesky](https://github.com/TUDelft-CNS-ATM/bluesky) built by the TU Delft Air Traffic Management department.
 
 ## Status
-Work in Progress - Testing Version 1.0
+Ready for Release - Working Version 1.1
