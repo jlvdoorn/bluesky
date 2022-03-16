@@ -65,6 +65,8 @@ class Route():
         self.fromICAO = fromICAO
         self.toICAO = toICAO
 
+        stack.stack("pcall eham/deffix.scn")
+
     def generate_fltplan(self):
         """
         This function creates a flight plan with the use of FlightPlanDatabase.
@@ -374,7 +376,6 @@ class Route():
         elif '36C' in rndmSID: self.sidRWY = '36C'; self.sidRwyHdg = 360
         elif '36L' in rndmSID: self.sidRWY = '36L'; self.sidRwyHdg = 360
 
-        stack.stack("pcall eham/deffix.scn")
         stack.stack("move "+self.acid+" "+self.fromICAO+"/RWY"+self.sidRWY)
         stack.stack("hdg "+self.acid+" "+str(self.sidRwyHdg))
         stack.stack("ORIG "+self.acid+" "+self.fromICAO+"/RWY"+self.sidRWY)
@@ -439,7 +440,6 @@ class Route():
         runwaySTAR = starRWYs[np.random.randint(0,len(starRWYs))]
         self.starRWY = runwaySTAR
 
-        stack.stack("pcall eham/deffix.scn")
         stack.stack("DEST "+self.acid+" "+self.toICAO+"/RWY"+self.starRWY)
         stack.stack("pcall "+self.rndmSTAR+" "+self.acid+" abs")
 
