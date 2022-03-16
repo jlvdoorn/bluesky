@@ -9,11 +9,6 @@ Joost Ellerbroek, 2022
 Jacco Hoekstra, 2022
 """
 
-###################### TODO #################################
-# Add auto return flight - NOT POSSIBLE (INVALID STACK CMD) #
-#############################################################
-
-
 # Import the global bluesky objects. Uncomment the ones you need
 from bluesky import core, stack, traf, settings, navdb, sim, scr, tools
 from bluesky.tools import calculator
